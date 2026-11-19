@@ -49,4 +49,4 @@ MIT licensed.
 
 - `skills/` and `.claude-plugin/`: the skills and Claude Code plugin above (repo root, so `npx skills add` and `/plugin marketplace add` find them)
 - `python/`: the Python SDK (`importly`) and the LangChain (`langchain-importly`) and LlamaIndex (`llama-index-readers-importly`) loaders. See [python/README.md](python/README.md)
-- `n8n/`: the n8n community node and workflow templates (coming soon)
+- `n8n/`: the n8n community node (`n8n-nodes-importly`) and three ready-made workflows: new YouTube videos to Google Drive, YouTube transcripts to Google Sheets, TikTok and Instagram links from a form to S3. See [n8n/README.md](n8n/README.md)

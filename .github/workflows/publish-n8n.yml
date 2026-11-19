@@ -1,0 +1,56 @@
+# Publishes the n8n community node in n8n/ (n8n-nodes-importly) to npm with provenance.
+# n8n requires community nodes to be published from GitHub Actions with npm provenance
+# (since 2026-05-01) before they can be verified for n8n Cloud.
+#
+# Release: bump "version" in n8n/package.json and n8n/CHANGELOG.md, commit, then either
+#   - push a tag n8n-v<version> (e.g. git tag n8n-v0.1.0 && git push origin n8n-v0.1.0), or
+#   - run this workflow by hand (Actions > Publish n8n node > Run workflow).
+# Needs the NPM_TOKEN repository secret (an npm granular token with publish rights).
+
+name: Publish n8n node
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'n8n-v*'
+
+jobs:
+  publish:
+    name: Publish n8n-nodes-importly to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: n8n
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: n8n/package-lock.json
+
+      - name: Check the tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/n8n-v')
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "n8n-v${VERSION}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package version ${VERSION}" >&2
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+      - name: Publish
+        # RELEASE_MODE lets the starter's prepublishOnly guard (n8n-node prerelease) through.
+        run: npm publish --provenance --access public
+        env:
+          RELEASE_MODE: 'true'
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

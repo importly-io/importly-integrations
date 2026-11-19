@@ -1,0 +1,67 @@
+{
+	"name": "n8n-nodes-importly",
+	"version": "0.1.0",
+	"description": "Turn any video or audio link into files, transcripts and metadata in n8n: save YouTube, TikTok and Instagram videos to Drive or S3, get transcripts and metadata.",
+	"license": "MIT",
+	"homepage": "https://www.importly.io/?utm_source=n8n&utm_medium=npm&utm_campaign=guerrilla-2026-11",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"importly",
+		"youtube",
+		"tiktok",
+		"instagram",
+		"video download",
+		"transcript",
+		"video metadata",
+		"podcast"
+	],
+	"author": {
+		"name": "Importly",
+		"email": "hello@importly.io"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/importly-io/importly-integrations.git",
+		"directory": "n8n"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease",
+		"test": "n8n-node build && node --test test/*.test.js"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/ImportlyApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/Importly/Importly.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "*",
+		"eslint": "9.32.0",
+		"prettier": "3.6.2",
+		"release-it": "^21.1.0",
+		"typescript": "5.9.2"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	},
+	"engines": {
+		"node": ">=20.15"
+	},
+	"bugs": {
+		"url": "https://github.com/importly-io/importly-integrations/issues"
+	}
+}

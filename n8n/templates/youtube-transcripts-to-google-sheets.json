@@ -1,0 +1,299 @@
+{
+  "name": "YouTube transcripts to Google Sheets with Importly",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## YouTube transcripts into Google Sheets\nAdd video links to a sheet; this fills in the title, transcript and language for every row that doesn't have one yet. Uses the video's captions ($0.003 each), or speech-to-text for videos without captions if you turn it on.\n\n### Setup\n1. Get an Importly API key at https://www.importly.io/dashboard/api-key?utm_source=n8n&utm_medium=template&utm_campaign=guerrilla-2026-11 (free to try, no card required).\n2. In the **Importly** node, create an **Importly API** credential and paste the key.\n3. Make a Google Sheet with the columns `url`, `title`, `language`, `transcript`.\n4. Pick that sheet in **Read video links** and **Write transcript to sheet**.\n\nPrefer Notion? Swap the last node for **Notion > Create database page** and map the same fields.",
+        "height": 440,
+        "width": 440
+      },
+      "id": "ec61ff68-c94b-4857-96c7-98b9c45bd50d",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Videos without captions\nIn **Get transcript** > Options, set **Source** to **Importly Speech-to-Text** ($0.01 per minute). Add **Max Cost (USD)** to cap long videos.\n\nGoogle Sheets cells hold 50,000 characters, so very long transcripts are cut to fit.",
+        "height": 240,
+        "width": 360,
+        "color": 7
+      },
+      "id": "be1374bc-d961-49da-8bb7-7e6c8eb4c2ae",
+      "name": "No captions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        680,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "4ebd5b54-daab-4c94-ba86-4b97441ffd29",
+      "name": "Every day",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "75cd601e-23f3-4115-bf63-126b51886295",
+      "name": "Read video links",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a0a7e138-d0a9-41e7-beae-953b7080fd50",
+              "leftValue": "={{ $json.url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d8b24cf8-880f-4844-9264-81187d06441a",
+              "leftValue": "={{ $json.transcript }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a34d2f1f-1872-4a00-9352-1d0f85389f43",
+      "name": "Only rows without a transcript",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "transcript",
+        "operation": "get",
+        "url": "={{ $json.url }}",
+        "waitForCompletion": true,
+        "options": {
+          "includeSegments": false
+        }
+      },
+      "id": "0d95467d-c5cd-4310-9a64-50e9201116f4",
+      "name": "Get transcript",
+      "type": "n8n-nodes-importly.importly",
+      "typeVersion": 1,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "metadata",
+        "operation": "getBasic",
+        "url": "={{ $('Only rows without a transcript').item.json.url }}",
+        "waitForCompletion": true,
+        "options": {}
+      },
+      "id": "0105e605-7389-4ad9-a27c-ac82c9cf99dc",
+      "name": "Get title",
+      "type": "n8n-nodes-importly.importly",
+      "typeVersion": 1,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Only rows without a transcript').item.json.url }}",
+            "title": "={{ $json.title }}",
+            "language": "={{ $('Get transcript').item.json.language }}",
+            "transcript": "={{ $('Get transcript').item.json.text.slice(0, 49000) }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "9dfc6770-030b-48a8-b14c-c993c705c154",
+      "name": "Write transcript to sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1100,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Every day": {
+      "main": [
+        [
+          {
+            "node": "Read video links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read video links": {
+      "main": [
+        [
+          {
+            "node": "Only rows without a transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only rows without a transcript": {
+      "main": [
+        [
+          {
+            "node": "Get transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get transcript": {
+      "main": [
+        [
+          {
+            "node": "Get title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get title": {
+      "main": [
+        [
+          {
+            "node": "Write transcript to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

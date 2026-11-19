@@ -1,0 +1,25 @@
+name: n8n node CI
+
+on:
+  pull_request:
+    paths: ['n8n/**', '.github/workflows/ci-n8n.yml']
+  push:
+    branches: [main]
+    paths: ['n8n/**', '.github/workflows/ci-n8n.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: n8n
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: n8n/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test

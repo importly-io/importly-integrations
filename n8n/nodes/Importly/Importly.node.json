@@ -1,0 +1,28 @@
+{
+	"node": "n8n-nodes-importly.importly",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Data & Storage", "Marketing & Content"],
+	"alias": [
+		"YouTube",
+		"TikTok",
+		"Instagram",
+		"Video",
+		"Audio",
+		"Download",
+		"Transcript",
+		"Podcast"
+	],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://www.importly.io/docs/authentication"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://www.importly.io/docs/introduction"
+			}
+		]
+	}
+}

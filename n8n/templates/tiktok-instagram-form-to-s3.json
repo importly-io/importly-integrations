@@ -1,0 +1,209 @@
+{
+  "name": "Save TikTok and Instagram videos from a form to S3 with metadata, using Importly",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## TikTok and Instagram links from a form to S3\nSomeone pastes a TikTok, Instagram Reel or YouTube Short link into the form. The video and a JSON file with its metadata (caption, uploader, views, likes, tags) are saved side by side in your S3 bucket.\n\n### Setup\n1. Get an Importly API key at https://www.importly.io/dashboard/api-key?utm_source=n8n&utm_medium=template&utm_campaign=guerrilla-2026-11 (free to try, no card required).\n2. In the **Importly** node, create an **Importly API** credential and paste the key.\n3. Connect AWS in both **Save** nodes and set your bucket name. For Cloudflare R2, Backblaze B2 or MinIO, use the **S3** node instead with your endpoint.\n4. Activate the workflow and share the form URL from **Link form**.",
+        "height": 440,
+        "width": 440
+      },
+      "id": "8969a52e-25d6-4979-ad51-f9c340afffd5",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Want Importly to write to S3 directly?\nSave your bucket once on the Importly dashboard, then in **Download the video** > Options turn on **Copy to Your S3 Bucket** and turn off **Download File**. The file never passes through n8n, which suits large videos.",
+        "height": 220,
+        "width": 380,
+        "color": 7
+      },
+      "id": "b2cb5e75-37e9-47c7-8b1a-f57b99dab56b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        760,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Save a video",
+        "formDescription": "Paste a TikTok, Instagram or YouTube Shorts link.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Video link",
+              "placeholder": "https://www.tiktok.com/@user/video/...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "51529ac8-2670-4916-8be6-f85264e75073",
+      "name": "Link form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        200
+      ],
+      "webhookId": "447e6fe2-a810-444d-91cc-6ac2c29ba4db"
+    },
+    {
+      "parameters": {
+        "resource": "metadata",
+        "operation": "get",
+        "url": "={{ $json['Video link'] }}",
+        "waitForCompletion": true,
+        "simplify": true,
+        "options": {}
+      },
+      "id": "c1db2fbb-79d8-4c96-8932-d38c64eca6f5",
+      "name": "Get metadata",
+      "type": "n8n-nodes-importly.importly",
+      "typeVersion": 1,
+      "position": [
+        220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "import",
+        "url": "={{ $('Link form').item.json['Video link'] }}",
+        "waitForCompletion": true,
+        "downloadFile": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "videoQuality": "1080p",
+          "maxCostDollars": 0.5
+        }
+      },
+      "id": "98756933-e069-416e-a495-336c5203b7c4",
+      "name": "Download the video",
+      "type": "n8n-nodes-importly.importly",
+      "typeVersion": 1,
+      "position": [
+        440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "your-bucket",
+        "fileName": "=videos/{{ $('Get metadata').item.json.id }}/{{ $json.filename }}",
+        "additionalFields": {}
+      },
+      "id": "b03584ac-e222-4b32-8790-9cf488901a09",
+      "name": "Save video to S3",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "mode": "each",
+        "options": {
+          "fileName": "metadata.json"
+        }
+      },
+      "id": "06ba84f5-fbba-4c2d-a257-b55ff6e6eec5",
+      "name": "Metadata as JSON file",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "your-bucket",
+        "fileName": "=videos/{{ $('Get metadata').item.json.id }}/metadata.json",
+        "additionalFields": {}
+      },
+      "id": "4e8b6044-f614-4f33-97c5-37e9b8d9f46f",
+      "name": "Save metadata to S3",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        660,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Link form": {
+      "main": [
+        [
+          {
+            "node": "Get metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get metadata": {
+      "main": [
+        [
+          {
+            "node": "Download the video",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Metadata as JSON file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download the video": {
+      "main": [
+        [
+          {
+            "node": "Save video to S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Metadata as JSON file": {
+      "main": [
+        [
+          {
+            "node": "Save metadata to S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
