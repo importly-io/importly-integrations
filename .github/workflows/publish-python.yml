@@ -1,0 +1,94 @@
+# Publishes one Python package from python/ to PyPI with trusted publishing (OIDC, no token).
+#
+# PyPI pending publishers are registered for importly, langchain-importly and
+# llama-index-readers-importly with: owner importly-io, repo importly-integrations,
+# workflow publish-python.yml, no environment. Keep this filename and don't add an environment.
+#
+# Release one package by pushing a tag whose version matches its pyproject.toml:
+#   python-importly-v0.1.0
+#   python-langchain-importly-v0.1.0
+#   python-llama-index-readers-importly-v0.1.0
+# or run it by hand (Actions > Publish Python package > Run workflow) and pick the package.
+# Publish importly first: the loaders depend on it.
+name: Publish Python package
+
+on:
+  push:
+    tags:
+      - "python-importly-v*"
+      - "python-langchain-importly-v*"
+      - "python-llama-index-readers-importly-v*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        required: true
+        type: choice
+        options:
+          - importly
+          - langchain-importly
+          - llama-index-readers-importly
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.pick.outputs.package }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the package
+        id: pick
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            package="${{ inputs.package }}"
+            tag_version=""
+          else
+            name="${GITHUB_REF_NAME#python-}"   # langchain-importly-v0.1.0
+            package="${name%-v*}"               # langchain-importly
+            tag_version="${name##*-v}"          # 0.1.0
+          fi
+          case "$package" in
+            importly|langchain-importly|llama-index-readers-importly) ;;
+            *) echo "Unknown package: $package"; exit 1 ;;
+          esac
+          version=$(python3 -c "import tomllib,sys; print(tomllib.load(open(sys.argv[1],'rb'))['project']['version'])" "python/$package/pyproject.toml")
+          if [ -n "$tag_version" ] && [ "$tag_version" != "$version" ]; then
+            echo "Tag says $tag_version but python/$package/pyproject.toml says $version"; exit 1
+          fi
+          echo "Publishing $package $version"
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Test
+        working-directory: python
+        run: ./scripts/test.sh
+
+      - name: Build
+        run: uv build --out-dir dist "python/${{ steps.pick.outputs.package }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

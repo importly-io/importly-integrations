@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "langchain-importly"
+version = "0.1.0"
+description = "LangChain document loader for video and audio links (YouTube, TikTok, podcasts and more) via the Importly API. Works from servers where downloads get blocked."
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Importly", email = "support@importly.io" }]
+keywords = ["langchain", "document-loader", "transcript", "youtube", "video", "audio", "podcast", "rag"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dependencies = [
+  "importly>=0.1.0,<0.2",
+  "langchain-core>=0.3.0,<2.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7", "pytest-asyncio>=0.23"]
+
+[project.urls]
+Homepage = "https://www.importly.io/?utm_source=langchain&utm_medium=package&utm_campaign=guerrilla-2026-11"
+Documentation = "https://www.importly.io/docs?utm_source=langchain&utm_medium=package&utm_campaign=guerrilla-2026-11"
+Repository = "https://github.com/importly-io/importly-integrations/tree/main/python/langchain-importly"
+Issues = "https://github.com/importly-io/importly-integrations/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["langchain_importly"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["live: calls the real Importly API (needs IMPORTLY_LIVE_TEST=1 and IMPORTLY_API_KEY)"]

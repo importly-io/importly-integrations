@@ -48,5 +48,5 @@ MIT licensed.
 ## What's in this repo
 
 - `skills/` and `.claude-plugin/`: the skills and Claude Code plugin above (repo root, so `npx skills add` and `/plugin marketplace add` find them)
-- `python/`: the Python SDK and LangChain / LlamaIndex loaders (coming soon)
+- `python/`: the Python SDK (`importly`) and the LangChain (`langchain-importly`) and LlamaIndex (`llama-index-readers-importly`) loaders. See [python/README.md](python/README.md)
 - `n8n/`: the n8n community node and workflow templates (coming soon)

@@ -1,0 +1,26 @@
+name: Python tests
+
+on:
+  push:
+    branches: [main]
+    paths: ["python/**", ".github/workflows/python-tests.yml"]
+  pull_request:
+    paths: ["python/**", ".github/workflows/python-tests.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Unit tests (mocked HTTP; live tests skipped)
+        working-directory: python
+        env:
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: ./scripts/test.sh

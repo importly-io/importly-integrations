@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llama-index-readers-importly"
+version = "0.1.0"
+description = "LlamaIndex reader for video and audio links (YouTube, TikTok, podcasts and more) via the Importly API. Works from servers where downloads get blocked."
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Importly", email = "support@importly.io" }]
+keywords = ["llama-index", "reader", "transcript", "youtube", "video", "audio", "podcast", "rag"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dependencies = [
+  "importly>=0.1.0,<0.2",
+  "llama-index-core>=0.12.0,<0.15",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7", "pytest-asyncio>=0.23"]
+
+[project.urls]
+Homepage = "https://www.importly.io/?utm_source=llamaindex&utm_medium=package&utm_campaign=guerrilla-2026-11"
+Documentation = "https://www.importly.io/docs?utm_source=llamaindex&utm_medium=package&utm_campaign=guerrilla-2026-11"
+Repository = "https://github.com/importly-io/importly-integrations/tree/main/python/llama-index-readers-importly"
+Issues = "https://github.com/importly-io/importly-integrations/issues"
+
+[tool.hatch.build.targets.sdist]
+include = ["llama_index/", "README.md", "LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+include = ["llama_index/"]
+
+[tool.llamahub]
+contains_example = false
+import_path = "llama_index.readers.importly"
+
+[tool.llamahub.class_authors]
+ImportlyReader = "importly"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["live: calls the real Importly API (needs IMPORTLY_LIVE_TEST=1 and IMPORTLY_API_KEY)"]

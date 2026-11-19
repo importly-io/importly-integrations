@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "importly"
+version = "0.1.0"
+description = "Turn any video or audio link into files, transcripts and metadata from your Python app. Works from servers where downloads get blocked."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Importly", email = "support@importly.io" }]
+keywords = ["video", "audio", "transcript", "youtube", "tiktok", "podcast", "metadata", "download", "api"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Video",
+  "Topic :: Multimedia :: Sound/Audio",
+  "Typing :: Typed",
+]
+dependencies = ["httpx>=0.24,<1"]
+
+[project.optional-dependencies]
+test = ["pytest>=7", "pytest-asyncio>=0.23"]
+
+[project.urls]
+Homepage = "https://www.importly.io/?utm_source=pypi&utm_medium=package&utm_campaign=guerrilla-2026-11"
+Documentation = "https://www.importly.io/docs?utm_source=pypi&utm_medium=package&utm_campaign=guerrilla-2026-11"
+Repository = "https://github.com/importly-io/importly-integrations/tree/main/python/importly"
+Issues = "https://github.com/importly-io/importly-integrations/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/importly"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["live: calls the real Importly API (needs IMPORTLY_LIVE_TEST=1 and IMPORTLY_API_KEY)"]
