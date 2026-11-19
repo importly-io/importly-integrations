@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "importly": {
+      "type": "http",
+      "url": "https://mcp.importly.io/mcp"
+    }
+  }
+}

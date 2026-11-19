@@ -1,0 +1,15 @@
+{
+  "name": "importly",
+  "description": "Importly skills for adding video and audio links to your app.",
+  "owner": {
+    "name": "Importly",
+    "email": "support@importly.io"
+  },
+  "plugins": [
+    {
+      "name": "importly",
+      "source": "./",
+      "description": "Add video downloads, transcripts and metadata to your app with the Importly API."
+    }
+  ]
+}

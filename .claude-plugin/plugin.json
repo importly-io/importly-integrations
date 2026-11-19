@@ -1,0 +1,19 @@
+{
+  "name": "importly",
+  "displayName": "Importly",
+  "version": "0.1.0",
+  "description": "Add video and audio link support to your app: files, transcripts and metadata from YouTube, TikTok, X, podcasts and 1,000+ other sites, through the Importly API.",
+  "author": {
+    "name": "Importly",
+    "email": "support@importly.io",
+    "url": "https://www.importly.io"
+  },
+  "homepage": "https://www.importly.io/docs/integrations/build-with-your-agent",
+  "repository": "https://github.com/importly-io/importly-integrations",
+  "license": "MIT",
+  "keywords": ["video", "audio", "transcript", "youtube", "tiktok", "podcast", "download", "metadata", "rag"],
+  "documentationUrl": "https://www.importly.io/docs",
+  "supportUrl": "https://www.importly.io/docs",
+  "privacyPolicyUrl": "https://www.importly.io/privacy",
+  "termsOfServiceUrl": "https://www.importly.io/terms-of-service"
+}
